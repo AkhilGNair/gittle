@@ -7,7 +7,7 @@ def current_branch() -> str:
     return head().read_text()
 
 
-def current_commit() -> str:
+def last_commit() -> str:
     return (branches() / current_branch()).read_text()
 
 

@@ -7,7 +7,7 @@ REFERENCES = "references"
 
 
 @lru_cache(maxsize=None)
-def get_repo_paths() -> Dict[str, Path]:
+def _get_repo_paths() -> Dict[str, Path]:
     cwd = Path.cwd()
     return {
         "root": cwd,
@@ -22,27 +22,37 @@ def get_repo_paths() -> Dict[str, Path]:
 
 
 def root() -> Path:
-    paths = get_repo_paths()
+    paths = _get_repo_paths()
     return paths["root"]
 
 
+def gittle() -> Path:
+    paths = _get_repo_paths()
+    return paths["gittle"]
+
+
 def store() -> Path:
-    paths = get_repo_paths()
+    paths = _get_repo_paths()
     return paths["store"]
 
 
 def staging() -> Path:
-    paths = get_repo_paths()
+    paths = _get_repo_paths()
     return paths["staging"]
 
 
 def head() -> Path:
-    paths = get_repo_paths()
+    paths = _get_repo_paths()
     return paths["head"]
 
 
+def workspace() -> Path:
+    paths = _get_repo_paths()
+    return paths["workspace"]
+
+
 def branches() -> Path:
-    paths = get_repo_paths()
+    paths = _get_repo_paths()
     return paths["branches"]
 
 

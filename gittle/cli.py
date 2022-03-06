@@ -14,8 +14,7 @@ def cli():
 @cli.command()
 def init():
     """Initialise a gittle repo."""
-    paths = gittle.paths.get_repo_paths()
-    root = paths["root"]
+    root = gittle.paths.root()
     exists = gittle.init.create_repo()
     if not exists:
         click.secho(f"Creating gittle repo at '{root}'", fg="green")
@@ -31,9 +30,13 @@ def add():
 
     if gittle.paths.store_empty():
         # Return all files
-        changed = gittle.add.find_files()
+        changed = gittle.commit.find_files()
     else:
-        changed = gittle.add.detect_changes()
+        changed = gittle.commit.detect_changes()
+
+    if not changed:
+        click.secho("No changes detected since last commit", fg="green")
+        sys.exit(0)
 
     preselected = [_file in staged for _file in changed]
 
@@ -44,13 +47,25 @@ def add():
         ],
     ).ask()
 
+    if new_stage is None:
+        click.secho("Operation cancelled by user", fg="red")
+        sys.exit(1)
+
     if set(staged).symmetric_difference(new_stage):
-        gittle.add.write_staging(new_stage)
+        gittle.stage.write(new_stage)
         click.secho("Updated staging area", fg="green")
+    else:
+        click.secho("Staging area unchanged", fg="yellow")
 
 
 @cli.command()
 def commit():
+    staged = gittle.stage.read()
+
+    if not staged:
+        click.secho("Nothing to commit!", fg="yellow")
+        sys.exit(0)
+
     commit = gittle.commit.take_snapshot()
 
     click.secho(

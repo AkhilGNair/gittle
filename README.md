@@ -1,9 +1,14 @@
 <h1 align="center">
-    Simple Python Project
+    Gittle
 </h1>
 
 <h4 align="center">
-    Simple python boilerplate code using setuptools
+    A simple reimplementation of basic git commands
 </h4>
 
-Just a quickstart project repo. 
+This repo is to illustrate the following commands
+
+ - `git add`
+ - `git commit`
+ - `git switch`
+ - `git log`

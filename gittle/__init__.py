@@ -1,1 +1,1 @@
-from gittle import add, commit, init, paths  # noqa:F401
+from gittle import commit, init, paths  # noqa:F401
