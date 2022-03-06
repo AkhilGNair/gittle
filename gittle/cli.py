@@ -27,9 +27,9 @@ def init():
 def add():
     """Stage files for adding to a gittle repo."""
     stage = gittle.paths.path_staging()
-    staged = gittle.add.read_lines(stage) if stage.exists() else []
+    staged = gittle.add.read_stage() if stage.exists() else []
 
-    if gittle.add.store_empty():
+    if gittle.paths.store_empty():
         # Return all files
         changed = gittle.add.find_files()
         preselected = [_file in staged for _file in changed]
@@ -45,9 +45,23 @@ def add():
     else:
         # Reconstruct the last snapshot repo state
         # Diff the current state to the last commit
-        click.secho("Not implemented", fg="red")
+        click.secho("Gittle 'add' with a non-empty store not implemented", fg="red")
         sys.exit(1)
 
     if set(staged).symmetric_difference(new_stage):
         gittle.add.write_staging(new_stage)
         click.secho("Updated staging area", fg="green")
+
+
+@cli.command()
+def commit():
+    n, blob_name = gittle.commit.create_blob()
+
+    if not n:
+        click.secho("No file staged to commit!", fg="red")
+        sys.exit(1)
+
+    click.secho(
+        f"Wrote a blob called '{blob_name}' with '{n}' files to the gittle store",
+        fg="green",
+    )

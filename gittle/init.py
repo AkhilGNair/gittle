@@ -6,6 +6,7 @@ def create_repo() -> None:
     exists = paths["gittle"].exists()
 
     paths["store"].mkdir(parents=True, exist_ok=True)
+    paths["workspace"].mkdir(parents=True, exist_ok=True)
     paths["head"].write_text("main")
 
     return exists

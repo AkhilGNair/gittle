@@ -14,9 +14,15 @@ def get_repo_paths() -> Dict[str, Path]:
         "gittle": cwd / GITTLE,
         "store": cwd / GITTLE / "store",
         "head": cwd / GITTLE / "HEAD",
+        "workspace": cwd / GITTLE / "workspace",
     }
 
 
 def path_staging():
     paths = get_repo_paths()
     return paths["gittle"] / STAGING_RECORD
+
+
+def store_empty():
+    paths = get_repo_paths()
+    return not bool(len(list(paths["store"].rglob("*"))))

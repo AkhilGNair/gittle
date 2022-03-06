@@ -3,8 +3,9 @@ from gittle.paths import GITTLE, get_repo_paths, path_staging
 NEW_LINE = "\n"
 
 
-def read_lines(path):
-    return path.read_text().strip().split("\n")
+def read_stage():
+    content = path_staging().read_text().strip()
+    return content.split("\n") if content else []
 
 
 def write_staging(files):
@@ -13,16 +14,11 @@ def write_staging(files):
     stage.write_text(content)
 
 
-def store_empty():
-    paths = get_repo_paths()
-    return not bool(len(list(paths["store"].rglob("*"))))
-
-
 def find_files():
     root = get_repo_paths()["root"]
 
     include = set(root.rglob("*"))
-    exclude = set(root.rglob(f"{GITTLE}/*"))
+    exclude = set(root.rglob(f"{GITTLE}/**/*"))
     exclude.add(root / GITTLE)
 
     paths = set(include).difference(exclude)
