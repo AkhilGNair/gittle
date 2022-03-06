@@ -1,7 +1,7 @@
 from gittle.paths import get_repo_paths
 
 
-def create_repo() -> None:
+def create_repo() -> bool:
     paths = get_repo_paths()
     exists = paths["gittle"].exists()
 

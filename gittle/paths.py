@@ -47,5 +47,4 @@ def branches() -> Path:
 
 
 def store_empty():
-    paths = get_repo_paths()
     return not bool(len(list(store().rglob("*"))))
