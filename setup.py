@@ -1,12 +1,12 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 __title__ = "gittle"
 __description__ = "Little git"
 __version__ = "0.1"
 
 REQUIRED_PACKAGES = [
-    # "click>=7.1.2",
-    # "rich==9.10.0",
+    "click>=7.1.2",
+    "questionary",
 ]
 
 setup(

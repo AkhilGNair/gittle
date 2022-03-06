@@ -1,26 +1,31 @@
-from pathlib import Path
-from glob import glob
+from gittle.paths import GITTLE, get_repo_paths, path_staging
 
-from gittle.paths import get_paths, GITTLE
+NEW_LINE = "\n"
+
+
+def read_lines(path):
+    return path.read_text().strip().split("\n")
+
+
+def write_staging(files):
+    stage = path_staging()
+    content = NEW_LINE.join(files) + NEW_LINE
+    stage.write_text(content)
 
 
 def store_empty():
-    paths = get_paths()
+    paths = get_repo_paths()
     return not bool(len(list(paths["store"].rglob("*"))))
 
 
 def find_files():
-    include = glob("*") + glob(".*")
-    exclude = glob(f"{GITTLE}/*") + [GITTLE]
-    return set(include).difference(exclude)
+    root = get_repo_paths()["root"]
 
+    include = set(root.rglob("*"))
+    exclude = set(root.rglob(f"{GITTLE}/*"))
+    exclude.add(root / GITTLE)
 
-def add():
-    if store_empty():
-        # Return all files
-        print(find_files())
-    else:
-        # Check the head file
-        # Reconstruct the last commit
-        # Diff the current state to the last commit
-        pass
+    paths = set(include).difference(exclude)
+    paths = {p.relative_to(root) for p in paths}
+
+    return sorted(str(p) for p in paths if p.is_file())
