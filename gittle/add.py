@@ -1,27 +1,36 @@
-from gittle.paths import GITTLE, get_repo_paths, path_staging
+from gittle import paths
+from gittle.commit import compute_address, read_snapshot
+from gittle.references import current_commit
 
 NEW_LINE = "\n"
 
 
-def read_stage():
-    content = path_staging().read_text().strip()
-    return content.split("\n") if content else []
-
-
 def write_staging(files):
-    stage = path_staging()
+    stage = paths.staging()
     content = NEW_LINE.join(files) + NEW_LINE
     stage.write_text(content)
 
 
 def find_files():
-    root = get_repo_paths()["root"]
-
+    root = paths.root()
     include = set(root.rglob("*"))
-    exclude = set(root.rglob(f"{GITTLE}/**/*"))
-    exclude.add(root / GITTLE)
+    exclude = set(root.rglob(f"{paths.GITTLE}/**/*"))
+    exclude.add(root / paths.GITTLE)
 
-    paths = set(include).difference(exclude)
-    paths = {p.relative_to(root) for p in paths}
+    files = set(include).difference(exclude)
+    files = {p.relative_to(root) for p in files}
 
-    return sorted(str(p) for p in paths if p.is_file())
+    return set(sorted(str(fp) for fp in files if fp.is_file()))
+
+
+def _detect_changes(files, snapshot):
+    for file in files:
+        hash, _ = compute_address(file)
+        if hash not in snapshot:
+            yield file
+
+
+def detect_changes():
+    snapshot = read_snapshot(snapshot=current_commit())
+    changed = set(_detect_changes(files=find_files(), snapshot=snapshot))
+    return changed

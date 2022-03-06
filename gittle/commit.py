@@ -1,10 +1,8 @@
 from pathlib import Path
 import hashlib
-import tempfile
-import zipfile
+import zlib
 
-from gittle.add import read_stage
-from gittle.paths import get_repo_paths
+from gittle import paths, references, stage
 
 
 def make_hash(content, hash_length=8):
@@ -12,21 +10,37 @@ def make_hash(content, hash_length=8):
     return hash.hexdigest()[:hash_length]
 
 
-def create_blob():
-    """Creates a blob from the staged files."""
-    repo_paths = get_repo_paths()
-    store = repo_paths["store"]
+def _store(hash, content):
+    path = paths.store() / hash
+    path.write_bytes(zlib.compress(content))
+    return hash
 
-    temp_file = tempfile.NamedTemporaryFile(delete=False)
-    zip = zipfile.ZipFile(temp_file.name, "w", zipfile.ZIP_DEFLATED)
 
-    staged_files = read_stage()
-    if not staged_files:
-        return 0, None
+def compute_address(file):
+    content = Path(file).read_bytes()
+    hash = make_hash(content)
+    return hash, content
 
-    for _file in staged_files:
-        zip.write(_file)
 
-    blob_name = make_hash(Path(temp_file.name).read_bytes())
-    p = Path(temp_file.name).rename(Path(store / blob_name).with_suffix(".zip"))
-    return len(staged_files), p.with_suffix("").name
+def store_file(file):
+    return _store(*compute_address(file))
+
+
+def store_snapshot(hashes):
+    content = "\n".join(hashes).encode()
+    hash = make_hash(content)
+    return _store(hash=hash, content=content)
+
+
+def take_snapshot():
+    """Creates a snapshot of the repository."""
+    hashes = [store_file(file) for file in stage.read()]
+    commit = store_snapshot(hashes)
+    references.update(commit=commit)
+    stage.clear()
+    return commit
+
+
+def read_snapshot(snapshot):
+    content = (paths.store() / snapshot).read_bytes()
+    return set(zlib.decompress(content).decode("utf-8").split("\n"))
