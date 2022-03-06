@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
-__title__ = "package-name"
-__description__ = "Write a description"
+__title__ = "gittle"
+__description__ = "Little git"
 __version__ = "0.1"
 
 REQUIRED_PACKAGES = [
@@ -16,8 +16,8 @@ setup(
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     install_requires=REQUIRED_PACKAGES,
     # extras_require={"dev": DEV_PACKAGES},
-    # entry_points="""
-    #     [console_scripts]
-    #     stratins=src.cli:cli
-    # """,
+    entry_points="""
+        [console_scripts]
+        gittle=gittle.cli:cli
+    """,
 )
