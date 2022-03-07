@@ -71,9 +71,9 @@ def take_snapshot() -> str:
     updated = find_files().difference(not_staged)
 
     hashes = {store_file(file) for file in updated}
-    parents = references.current_commit()
+    parent = references.current_commit()
 
-    commit = store_snapshot(hashes=hashes, parents=parents if parents is not None else [])
+    commit = store_snapshot(hashes=hashes, parents=[parent] if parent is not None else [])
     references.update(commit=commit)
     stage.clear()
 
@@ -87,4 +87,4 @@ def read_blob(commit):
 
 def read_snapshot(snapshot: Optional[str]) -> Set[str]:
     # On the first commit, there is no previous snapshot
-    return read_blob(snapshot) if snapshot is not None else set()
+    return read_blob(snapshot) if snapshot is not None else dict(content="")

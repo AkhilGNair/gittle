@@ -89,8 +89,10 @@ def cat_object(commit):
 
     if "parents" in blob:
         click.secho("Parents:", fg="green")
-        for parent in blob["parents"]:
-            click.echo(f" - {parent}")
+        parents = blob["parents"]
+        if parents:
+            for parent in blob["parents"]:
+                click.echo(f" - {parent}")
         else:
             click.echo("Root commit")
         click.echo("")
