@@ -4,6 +4,7 @@ import click
 import questionary
 
 import gittle
+from gittle.paths import Paths
 
 
 @click.group()
@@ -14,18 +15,17 @@ def cli():
 @cli.command()
 def init():
     """Initialise a gittle repo."""
-    root = gittle.paths.root()
     exists = gittle.init.create_repo()
     if not exists:
-        click.secho(f"Creating gittle repo at '{root}'", fg="green")
+        click.secho(f"Creating gittle repo at '{Paths.root}'", fg="green")
     else:
-        click.secho(f"Gittle repo already exists at '{root}'", fg="yellow")
+        click.secho(f"Gittle repo already exists at '{Paths.root}'", fg="yellow")
 
 
 @cli.command()
 def add():
     """Stage files for adding to a gittle repo."""
-    stage = gittle.paths.staging()
+    stage = Paths.staging
     staged = gittle.stage.read() if stage.exists() else []
 
     if gittle.paths.store_empty():

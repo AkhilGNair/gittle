@@ -4,15 +4,15 @@ import hashlib
 import json
 import zlib
 
-from gittle import paths, references, stage
-from gittle.references import current_commit
+from gittle import references, stage
+from gittle.paths import Paths, GITTLE
 
 
 def find_files() -> Set[str]:
-    root = paths.root()
+    root = Paths.root
     include = set(root.rglob("*"))
-    exclude = set(root.rglob(f"{paths.GITTLE}/**/*"))
-    exclude.add(root / paths.GITTLE)
+    exclude = set(root.rglob(f"{GITTLE}/**/*"))
+    exclude.add(root / GITTLE)
 
     files = set(include).difference(exclude)
     files = {p.relative_to(root) for p in files}
@@ -28,8 +28,8 @@ def _detect_changes(files: Set[str], snapshot: Set[str]) -> Iterator[str]:
 
 
 def detect_changes() -> Set[str]:
-    snapshot = read_snapshot(snapshot=current_commit())
-    changed = set(_detect_changes(files=find_files(), snapshot=snapshot))
+    snapshot = read_snapshot(snapshot=references.current_commit())
+    changed = set(_detect_changes(files=find_files(), snapshot=snapshot["content"]))
     return changed
 
 
@@ -39,7 +39,7 @@ def make_hash(content: bytes, hash_length: int = 8) -> str:
 
 
 def _store(hash: str, blob: bytes) -> str:
-    path = paths.store() / hash
+    path = Paths.store / hash
     path.write_bytes(zlib.compress(blob))
     return hash
 
@@ -71,7 +71,7 @@ def take_snapshot() -> str:
     updated = find_files().difference(not_staged)
 
     hashes = {store_file(file) for file in updated}
-    parents = current_commit()
+    parents = references.current_commit()
 
     commit = store_snapshot(hashes=hashes, parents=parents if parents is not None else [])
     references.update(commit=commit)
@@ -81,7 +81,7 @@ def take_snapshot() -> str:
 
 
 def read_blob(commit):
-    content = (paths.store() / commit).read_bytes()
+    content = (Paths.store / commit).read_bytes()
     return json.loads(zlib.decompress(content).decode("utf-8"))
 
 

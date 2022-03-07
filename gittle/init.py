@@ -1,9 +1,9 @@
-from gittle import paths
+from gittle.paths import Paths
 
 
 def create_repo() -> bool:
-    exists = paths.gittle().exists()
-    paths.gittle().mkdir(exist_ok=True)
-    paths.store().mkdir(exist_ok=True)
-    paths.head().write_text("main")
+    exists = Paths.gittle.exists()
+    Paths.gittle.mkdir(exist_ok=True)
+    Paths.store.mkdir(exist_ok=True)
+    Paths.head.write_text("main")
     return exists

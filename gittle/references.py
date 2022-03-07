@@ -1,21 +1,27 @@
-from pathlib import Path
 from typing import Optional
 
-from gittle.paths import branches, head
+from gittle.paths import Paths
+
+
+class MissingGittleFile(Exception):
+    pass
 
 
 def current_branch() -> str:
-    return head().read_text()
+    try:
+        return Paths.head.read_text()
+    except FileNotFoundError:
+        raise MissingGittleFile("The HEAD file is missing")
 
 
 def current_commit() -> Optional[str]:
     try:
-        return (branches() / current_branch()).read_text()
+        return (Paths.branches / current_branch()).read_text()
     except FileNotFoundError:
         return None
 
 
 def update(commit: str) -> None:
-    Path(branches()).mkdir(parents=True, exist_ok=True)
-    branch_ref = branches() / current_branch()
+    Paths.branches.mkdir(parents=True, exist_ok=True)
+    branch_ref = Paths.branches / current_branch()
     branch_ref.write_text(commit)
