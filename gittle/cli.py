@@ -72,3 +72,29 @@ def commit():
         f"Wrote the snapshot (commit) called '{commit}' to the gittle store",
         fg="green",
     )
+
+
+@cli.command()
+@click.argument("commit")
+def cat_object(commit):
+    blob = gittle.commit.read_blob(commit)
+
+    if "file" in blob:
+        click.secho("File:", fg="green")
+        click.echo(blob["file"])
+        click.echo("")
+
+        click.secho("Content:", fg="green")
+        click.echo(blob["content"])
+
+    if "parents" in blob:
+        click.secho("Parents:", fg="green")
+        for parent in blob["parents"]:
+            click.echo(f" - {parent}")
+        else:
+            click.echo("Root commit")
+        click.echo("")
+
+        click.secho("Hashes:", fg="green")
+        for hash in blob["content"]:
+            click.echo(f" - {hash}")
