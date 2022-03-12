@@ -5,6 +5,6 @@ fmt:
 verify:
 	black --check --diff .
 	flake8 .
-	mypy .
+	mypy . --exclude build
 	pytest .
 

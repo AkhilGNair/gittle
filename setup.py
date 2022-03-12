@@ -6,7 +6,7 @@ __version__ = "0.1"
 
 REQUIRED_PACKAGES = [
     "click>=7.1.2",
-    "questionary",
+    "questionary==1.10.0",
 ]
 
 setup(
