@@ -25,19 +25,13 @@ def init():
 @cli.command()
 def add():
     """Stage files for adding to a gittle repo."""
-    stage = Paths.staging
-    staged = gittle.stage.read() if stage.exists() else []
-
-    if gittle.paths.store_empty():
-        # Return all files
-        changed = gittle.commit.find_files()
-    else:
-        changed = gittle.commit.detect_changes()
-
+    changed = gittle.commit.detect_changes()
     if not changed:
         click.secho("No changes detected since last commit", fg="green")
         sys.exit(0)
 
+    # Used to pre-populate the interactive staging selection
+    staged = gittle.stage.read() if Paths.staging.exists() else []
     preselected = [_file in staged for _file in changed]
 
     new_stage = questionary.checkbox(

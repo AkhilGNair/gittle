@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Iterator, Optional, Set, Tuple
 import hashlib
 import json
@@ -7,6 +6,8 @@ import zlib
 from gittle import references, stage
 from gittle.paths import Paths, GITTLE
 
+EMPTY_SNAPSHOT = dict(content="")
+
 
 def find_files() -> Set[str]:
     root = Paths.root
@@ -14,10 +15,11 @@ def find_files() -> Set[str]:
     exclude = set(root.rglob(f"{GITTLE}/**/*"))
     exclude.add(root / GITTLE)
 
-    files = set(include).difference(exclude)
-    files = {p.relative_to(root) for p in files}
+    paths = set(include).difference(exclude)
+    files = {str(p.relative_to(root)) for p in paths if p.is_file()}
 
-    return set(sorted(str(fp) for fp in files if fp.is_file()))
+    # Sorted for visual ordering in CLI
+    return set(sorted(files))
 
 
 def _detect_changes(files: Set[str], snapshot: Set[str]) -> Iterator[str]:
@@ -28,7 +30,7 @@ def _detect_changes(files: Set[str], snapshot: Set[str]) -> Iterator[str]:
 
 
 def detect_changes() -> Set[str]:
-    snapshot = read_snapshot(snapshot=references.current_commit())
+    snapshot = read_snapshot(commit=references.current_commit())
     changed = set(_detect_changes(files=find_files(), snapshot=snapshot["content"]))
     return changed
 
@@ -45,7 +47,7 @@ def _store(hash: str, blob: bytes) -> str:
 
 
 def content_address(file: str) -> Tuple[str, bytes]:
-    content = Path(file).read_text()
+    content = (Paths.root / file).read_text()
     blob = as_blob({"file": file, "content": content})
     hash = make_hash(blob)
     return hash, blob
@@ -60,7 +62,9 @@ def as_blob(details: dict) -> bytes:
 
 
 def store_snapshot(hashes: Set[str], parents=Set[str]) -> str:
-    blob = as_blob({"parents": parents, "content": list(hashes)})
+    content = sorted(list(hashes))
+    parents = sorted(list(parents))
+    blob = as_blob({"parents": parents, "content": content})
     hash = make_hash(blob)
     return _store(hash=hash, blob=blob)
 
@@ -80,11 +84,11 @@ def take_snapshot() -> str:
     return commit
 
 
-def read_blob(commit):
+def read_blob(commit) -> dict:
     content = (Paths.store / commit).read_bytes()
     return json.loads(zlib.decompress(content).decode("utf-8"))
 
 
-def read_snapshot(snapshot: Optional[str]) -> Set[str]:
+def read_snapshot(commit: Optional[str]) -> dict:
     # On the first commit, there is no previous snapshot
-    return read_blob(snapshot) if snapshot is not None else dict(content="")
+    return read_blob(commit) if commit is not None else EMPTY_SNAPSHOT
