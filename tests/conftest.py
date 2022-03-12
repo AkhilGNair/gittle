@@ -17,11 +17,6 @@ def cleanup(root):
     (root / ".gitkeep").touch()
 
 
-@pytest.fixture(autouse=True)
-def path_fixtures():
-    return ROOT / "tests" / "fixtures"
-
-
 @pytest.fixture()
 def repo():
     with patch("gittle.paths.Path.cwd") as cwd:

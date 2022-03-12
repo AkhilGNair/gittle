@@ -2,15 +2,17 @@ import gittle
 from gittle.paths import Paths
 
 ALL_FILES = {".hidden/hidden.txt", "src/__init__.py", ".names", ".gitkeep"}
-FIXTURE_FILE_HASH = "d30cc3af"
+FIXTURE_FILE_HASH = "e0fa1f50"
 
 
 def test_read_snapshot_with_no_commits():
     assert gittle.commit.read_snapshot(commit=None) == gittle.commit.EMPTY_SNAPSHOT
 
 
-def test_content_addressable_storage(path_fixtures, repo_no_commits):
-    hash, content = gittle.commit.content_address(str(path_fixtures / "commit_me.py"))
+def test_content_addressable_storage(repo_no_commits):
+    filename = "commit_me.py"
+    (Paths.root / filename).write_text("print('a commit!')")
+    hash, content = gittle.commit.content_address(filename)
     assert hash == FIXTURE_FILE_HASH
 
 
